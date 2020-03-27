@@ -184,7 +184,7 @@ namespace ControleEstoque.Web.Models
                     {
                         comando.CommandText = "insert into usuario (nome, login, senha) values (@nome, @login, @senha); select convert(int, scope_identity())";
 
-                        comando.Parameters.Add("@nome ", SqlDbType.VarChar).Value = this.Nome;
+                        comando.Parameters.Add("@nome", SqlDbType.VarChar).Value = this.Nome;
                         comando.Parameters.Add("@login", SqlDbType.VarChar).Value = this.Login;
                         comando.Parameters.Add("@senha", SqlDbType.VarChar).Value = CriptoHelper.HashMD5(this.Senha);
 
@@ -197,7 +197,7 @@ namespace ControleEstoque.Web.Models
                             (!string.IsNullOrEmpty(this.Senha) ? ", senha=@senha": "") +
                             " where id = @id";
 
-                        comando.Parameters.Add("@nome ", SqlDbType.VarChar).Value = this.Nome;
+                        comando.Parameters.Add("@nome", SqlDbType.VarChar).Value = this.Nome;
                         comando.Parameters.Add("@login", SqlDbType.VarChar).Value = this.Login;
 
                         if (!string.IsNullOrEmpty(this.Senha))
