@@ -7,22 +7,19 @@ using System.Web.Mvc;
 namespace ControleEstoque.Web.Controllers.Cadastro
 {
     [Authorize(Roles = "Gerente")]
-    public class CadUsuarioController : Controller
+    public class CadPerfilController : Controller
     {
-
         private const int _quantMaxLinhasPorPagina = 5;
-        private const string _senhaPadrao = "{$127;$188}";
 
-        
+
         public ActionResult Index()
         {
-            ViewBag.ListaPerfil = PerfilModel.RecuperarListaAtivos();
             ViewBag.ListaTamPag = new SelectList(new int[] { _quantMaxLinhasPorPagina, 10, 15, 20 }, _quantMaxLinhasPorPagina);
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
 
-            var lista = UsuarioModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
-            var quant = UsuarioModel.RecuperarQuantidade();
+            var lista = PerfilModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
+            var quant = PerfilModel.RecuperarQuantidade();
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
             ViewBag.QuantPaginas = (quant / ViewBag.QuantMaxLinhasPorPagina) + difQuantPaginas;
@@ -30,31 +27,32 @@ namespace ControleEstoque.Web.Controllers.Cadastro
             return View(lista);
         }
 
-        [HttpPost]        
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult UsuarioPagina(int pagina, int tamPag)
+        public JsonResult PerfilPagina(int pagina, int tamPag)
         {
-            var lista = UsuarioModel.RecuperarLista(pagina, tamPag);
+            var lista = PerfilModel.RecuperarLista(pagina, tamPag);
 
             return Json(lista);
         }
-        [HttpPost]        
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RecuperarUsuario(int id)
+        public JsonResult RecuperarPerfil(int id)
         {
-            return Json(UsuarioModel.RecuperarPeloId(id));
+            return Json(PerfilModel.RecuperarPeloId(id));
         }
 
-        [HttpPost]       
+        [HttpPost]      
         [ValidateAntiForgeryToken]
-        public ActionResult ExcluirUsuario(int id)
+        public JsonResult ExcluirPerfil(int id)
         {
-            return Json(UsuarioModel.ExcluirPeloId(id));
+            return Json(PerfilModel.ExcluirPeloId(id));
         }
 
-        [HttpPost]        
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SalvarUsuario(UsuarioModel model)
+        public JsonResult SalvarPerfil(PerfilModel model)
         {
             var resultado = "OK";
             var mensagens = new List<string>();
@@ -69,11 +67,6 @@ namespace ControleEstoque.Web.Controllers.Cadastro
             {
                 try
                 {
-                    if (model.Senha == _senhaPadrao)
-                    {
-                        model.Senha = "";
-                    }
-
                     var id = model.Salvar();
 
                     if (id > 0)
@@ -93,6 +86,5 @@ namespace ControleEstoque.Web.Controllers.Cadastro
             }
             return Json(new { Resultado = resultado, Mensagens = mensagens, IdSalvo = idSalvo });
         }
-        
     }
 }

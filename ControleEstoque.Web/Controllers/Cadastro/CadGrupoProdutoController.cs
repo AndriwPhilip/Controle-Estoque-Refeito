@@ -7,11 +7,12 @@ using System.Web.Mvc;
 
 namespace ControleEstoque.Web.Controllers
 {
+    [Authorize(Roles = "Gerente,Administrativo,Operador")]
     public class CadGrupoProdutoController : Controller
     {
         private const int _quantMaxLinhasPorPagina = 5;
 
-        [Authorize]
+
         public ActionResult Index()
         {
             ViewBag.ListaTamPag = new SelectList(new int[] { _quantMaxLinhasPorPagina, 10, 15, 20 }, _quantMaxLinhasPorPagina);
@@ -20,7 +21,7 @@ namespace ControleEstoque.Web.Controllers
 
             var lista = GrupoProdutoModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
             var quant = GrupoProdutoModel.RecuperarQuantidade();
-    
+
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
             ViewBag.QuantPaginas = (quant / ViewBag.QuantMaxLinhasPorPagina) + difQuantPaginas;
 
@@ -28,7 +29,6 @@ namespace ControleEstoque.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public JsonResult GrupoProdutoPagina(int pagina, int tamPag)
         {
@@ -38,25 +38,21 @@ namespace ControleEstoque.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarGrupoProduto(int id)
         {
             return Json(GrupoProdutoModel.RecuperarPeloId(id));
         }
 
-        
-
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Gerente,Administrativo")]
         [ValidateAntiForgeryToken]
         public JsonResult ExcluirGrupoProduto(int id)
         {
-           return Json(GrupoProdutoModel.ExcluirPeloId(id));
+            return Json(GrupoProdutoModel.ExcluirPeloId(id));
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public JsonResult SalvarGrupoProduto(GrupoProdutoModel model)
         {
@@ -88,7 +84,7 @@ namespace ControleEstoque.Web.Controllers
                 {
                     resultado = "ERRO";
                 }
-                
+
             }
             return Json(new { Resultado = resultado, Mensagens = mensagens, IdSalvo = idSalvo });
         }
