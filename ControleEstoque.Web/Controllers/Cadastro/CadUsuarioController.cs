@@ -16,7 +16,7 @@ namespace ControleEstoque.Web.Controllers.Cadastro
         
         public ActionResult Index()
         {
-            ViewBag.ListaPerfil = PerfilModel.RecuperarListaAtivos();
+            
             ViewBag.ListaTamPag = new SelectList(new int[] { _quantMaxLinhasPorPagina, 10, 15, 20 }, _quantMaxLinhasPorPagina);
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
