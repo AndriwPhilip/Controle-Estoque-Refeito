@@ -1,5 +1,4 @@
-﻿
-#grid_cadastro > thead > tr th:nth-child(2) {
+﻿﻿#grid_cadastro > thead > tr th:nth-child(2) {
     width: 110px;
 }
 
@@ -23,5 +22,6 @@
 #cabecalho_grid {
     margin-bottom: 20px;
 }
-
-
+.invisivel {
+    display: none;
+}
