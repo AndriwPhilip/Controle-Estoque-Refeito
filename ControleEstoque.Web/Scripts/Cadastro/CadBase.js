@@ -4,6 +4,7 @@
 }
 
 function formatar_mensagem_aviso(mensagens) {
+    /*
     var ret = '';
 
     for (var i = 0; i < mensagens.length; i++) {
@@ -11,6 +12,15 @@ function formatar_mensagem_aviso(mensagens) {
     }
 
     return '<ul>' + ret + '</ul>';
+    *//*O template substitui isso*/
+
+    var template =
+        '<ul>' +
+        '{[ #. }}' +
+        '<li>{{ . }}</li>' +
+        '{{ /. }}'
+    '</ul >';
+    return Mustache.render(template, mensagens);
 }
 
 function abrir_form(dados) {
@@ -38,16 +48,10 @@ function abrir_form(dados) {
 }
 
 function criar_linha_grid(dados) {
-    var ret =
-        '<tr data-id=' + dados.Id + '>' +
-        set_dados_grid(dados) +
-        '<td>' +
-        '<a class="btn btn-primary btn-alterar" role="button" style="margin-right: 3px"><i class="glyphicon glyphicon-pencil"></i> Alterar</a>' +
-        '<a class="btn btn-danger btn-excluir" role="button"><i class="glyphicon glyphicon-trash"></i> Excluir</a>' +
-        '</td>' +
-        '</tr>';
 
-    return ret;
+    var template = $('#template-grid').html();
+
+    return Mustache.render(template, dados);
 }
 
 $(document).on('click', '#btn_incluir', function () {
