@@ -16,12 +16,7 @@ namespace ControleEstoque.Web.Controllers
         public ActionResult Produto()
         {
             return View();
-        }
-        [Authorize]
-        public ActionResult Fornecedor()
-        {
-            return View();
-        }
+        }        
         
     }
 }
