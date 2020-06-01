@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
@@ -20,7 +18,6 @@ namespace ControleEstoque.Web
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
 
-        /* Inicio de prevensao do sqlInjection*/
         void Application_Error(object sender, EventArgs e)
         {
             Exception ex = Server.GetLastError();
@@ -33,12 +30,12 @@ namespace ControleEstoque.Web
                 Response.Write("{ \"Resultado\":\"AVISO\",\"Mensagens\":[\"Somente texto sem caracteres especiais pode ser enviado.\"],\"IdSalvo\":\"\"}");
                 Response.End();
             }
-            /*Resposta na tela do anti forgery*/
             else if (ex is HttpAntiForgeryException)
             {
                 Response.Clear();
                 Response.StatusCode = 200;
                 Response.End();
+                // gravar LOG
             }
         }
 
@@ -57,11 +54,13 @@ namespace ControleEstoque.Web
                     return;
                 }
 
-                var perfis = ticket.UserData.Split(';') ;
+                var partes = ticket.UserData.Split('|');
+                var id = Convert.ToInt32(partes[0]);
+                var perfis = partes[1].Split(';');
 
-                if(Context.User != null)
+                if (Context.User != null)
                 {
-                    Context.User = new GenericPrincipal(Context.User.Identity, perfis);
+                    Context.User = new AplicacaoPrincipal(Context.User.Identity, perfis, id);
                 }
             }
         }
