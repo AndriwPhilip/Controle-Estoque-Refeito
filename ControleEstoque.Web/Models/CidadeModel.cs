@@ -41,7 +41,7 @@ namespace ControleEstoque.Web.Models
             return ret;
         }
 
-        public static List<CidadeModel> RecuperarLista(int pagina = 0, int tamPagina = 0, string filtro = "", int idEstado = 0)
+        public static List<CidadeModel> RecuperarLista(int pagina = 0, int tamPagina = 0, string filtro = "", int idEstado = 0, string ordem = "")
         {
             var ret = new List<CidadeModel>();
 
@@ -59,7 +59,7 @@ namespace ControleEstoque.Web.Models
                         filtroWhere = string.Format(" (lower(c.nome) like '%{0}%') and", filtro.ToLower());
                     }
 
-                    if(idEstado > 0)
+                    if (idEstado > 0)
                     {
                         filtroWhere += string.Format(" (id_estado = {0}) and", idEstado);
                     }
@@ -78,7 +78,7 @@ namespace ControleEstoque.Web.Models
                         " where" +
                         filtroWhere +
                         " (c.id_estado = e.id)" +
-                        " order by c.nome" +
+                        " order by " + (!string.IsNullOrEmpty(ordem) ? ordem : "c.nome") +
                         paginacao;
 
                     var reader = comando.ExecuteReader();

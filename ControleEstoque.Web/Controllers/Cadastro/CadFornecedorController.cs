@@ -22,22 +22,20 @@ namespace ControleEstoque.Web.Controllers
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
             ViewBag.QuantPaginas = (quant / ViewBag.QuantMaxLinhasPorPagina) + difQuantPaginas;
-            ViewBag.Paises = PaisModel.RecuperarLista();            
+            ViewBag.Paises = PaisModel.RecuperarLista();
 
             return View(lista);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult FornecedorPagina(int pagina, int tamPag)
+        public JsonResult FornecedorPagina(int pagina, int tamPag, string ordem)
         {
-            var lista = FornecedorModel.RecuperarLista(pagina, tamPag);
+            var lista = FornecedorModel.RecuperarLista(pagina, tamPag, ordem: ordem);
 
             return Json(lista);
         }
 
-       
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarFornecedor(int id)

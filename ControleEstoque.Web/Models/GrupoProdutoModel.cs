@@ -41,7 +41,7 @@ namespace ControleEstoque.Web.Models
         }
 
 
-        public static List<GrupoProdutoModel> RecuperarLista(int pagina, int tamPagina, string filtro = "")
+        public static List<GrupoProdutoModel> RecuperarLista(int pagina, int tamPagina, string filtro = "", string ordem= "")
         {
             var ret = new List<GrupoProdutoModel>();
 
@@ -64,7 +64,7 @@ namespace ControleEstoque.Web.Models
                         "select *"+
                         " from grupo_produto" +
                          filtroWhere +
-                        " order by nome" +
+                        " order by " + (!string.IsNullOrEmpty(ordem) ? ordem : "nome") +
                         " offset {0} rows fetch next {1} rows only",
                         pos > 0 ? pos - 1 : 0, tamPagina);
                     var reader = comando.ExecuteReader();

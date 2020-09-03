@@ -78,7 +78,7 @@ function preencher_linha_grid(param, linha) {
 
 $(document)
     .ready(function () {
-        $('#txt_telefone').mask('(00) 00000-0000');
+        $('#txt_telefone').mask('(00) 0000-0000');
         $('#txt_cep').mask('00000-000');
     })
     .on('click', '#cbx_pessoa_juridica', function () {
@@ -134,4 +134,4 @@ $(document)
                 }
             });
         }
-    })
+    });

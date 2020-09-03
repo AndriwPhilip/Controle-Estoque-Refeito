@@ -30,6 +30,27 @@ function preencher_linha_grid(param, linha) {
         .eq(1).html(param.Ativo ? 'SIM' : 'NÃO');
 }
 
+﻿function marcar_ordenacao_campo(coluna) {
+    var ordem_crescente = true,
+        ordem = coluna.find('i');
+
+    if (ordem.length > 0) {
+        ordem_crescente = ordem.hasClass('glyphicon-arrow-down');
+        if (ordem_crescente) {
+            ordem.removeClass('glyphicon-arrow-down');
+            ordem.addClass('glyphicon glyphicon-arrow-up');
+        }
+        else {
+            ordem.removeClass('glyphicon-arrow-up');
+            ordem.addClass('glyphicon-arrow-down');
+        }
+    }
+    else {
+        $('.coluna-ordenacao i').remove();
+        coluna.append('&nbsp;<i class="glyphicon glyphicon-arrow-down" style="color: #000000"></i>');
+    }
+}
+
 
 $(document).ready(function () {
     var grid = $('#grid_cadastro > tbody');
@@ -37,3 +58,4 @@ $(document).ready(function () {
         grid.append(criar_linha_grid(linhas[i]));
     }
 });
+

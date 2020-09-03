@@ -21,10 +21,10 @@
 }
 
 @section TituloGrid {
-    <th>Nome</th>
-    <th>Telefone</th>
-    <th>Contato</th>
-    <th>Ativo</th>
+    <th><span class="coluna-ordenacao" data-campo="nome">Nome</span></th>
+    <th><span class="coluna-ordenacao" data-campo="telefone">Telefone</span></th>
+    <th><span class="coluna-ordenacao" data-campo="contato">Contato</span></th>
+    <th><span class="coluna-ordenacao" data-campo="ativo">Ativo</span></th>
     <th>Ação</th>
 }
 
@@ -36,13 +36,13 @@
         </div>
         <div class="col-md-3" style="line-height: 2.2em">
             <div class="form-check">
+                @Html.RadioButton("cbx_pessoa", (int)ControleEstoque.Web.Models.TipoPessoa.Juridica, new { id = "cbx_pessoa_juridica", @class = "form-check-input" })
+                @Html.Label("cbx_pessoa_juridica", "Pessoa Jurídica", new { @class = "form-check-label" })
+            </div>
+            <div class="form-check">
                 @Html.RadioButton("cbx_pessoa", (int)ControleEstoque.Web.Models.TipoPessoa.Fisica, new { id = "cbx_pessoa_fisica", @class = "form-check-input" })
                 @Html.Label("cbx_pessoa_fisica", "Pessoa Física", new { @class = "form-check-label" })
             </div>
-            <div class="form-check">
-                @Html.RadioButton("cbx_pessoa", (int)ControleEstoque.Web.Models.TipoPessoa.Juridica, new { id = "cbx_pessoa_juridica", @class = "form-check-input" })
-                @Html.Label("cbx_pessoa_juridica", "Pessoa Jurídica", new { @class = "form-check-label" })
-            </div>            
         </div>
     </div>
     <div class="row">
@@ -95,7 +95,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             @Html.Label("ddl_pais", "País", new { @class = "control-label" })
-                            @Html.DropDownList("ddl_pais", new SelectList(ViewBag.Paises, "Id" , "Nome"), new { @class = "form-control" })
+                            @Html.DropDownList("ddl_pais", new SelectList(ViewBag.Paises, "Id", "Nome"), new { @class = "form-control" })
                         </div>
                     </div>
                     <div class="row">
@@ -133,6 +133,7 @@
         var url_confirmar = '@Url.Action("SalvarFornecedor", "CadFornecedor")';
         var url_page_click = '@Url.Action("FornecedorPagina", "CadFornecedor")';
         var url_tam_pag_change = '@Url.Action("FornecedorPagina", "CadFornecedor")';
+        var url_filtro_change = '@Url.Action("FornecedorPagina", "CadFornecedor")';
         var url_alterar = '@Url.Action("RecuperarFornecedor", "CadFornecedor")';
         var url_listar_estados = '@Url.Action("RecuperarEstadosDoPais", "CadEstado")';
         var url_listar_cidades = '@Url.Action("RecuperarCidadesDoEstado", "CadCidade")';

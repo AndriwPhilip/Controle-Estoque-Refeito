@@ -1,25 +1,55 @@
-﻿function add_anti_forgery_token(data) {
+﻿function marcar_ordenacao_campo(coluna) {
+    var ordem_crescente = true,
+        ordem = coluna.find('i');
+
+    if (ordem.length > 0) {
+        ordem_crescente = ordem.hasClass('glyphicon-arrow-down');
+        if (ordem_crescente) {
+            ordem.removeClass('glyphicon-arrow-down');
+            ordem.addClass('glyphicon glyphicon-arrow-up');
+        }
+        else {
+            ordem.removeClass('glyphicon-arrow-up');
+            ordem.addClass('glyphicon-arrow-down');
+        }
+    }
+    else {
+        $('.coluna-ordenacao i').remove();
+        coluna.append('&nbsp;<i class="glyphicon glyphicon-arrow-down" style="color: #000000"></i>');
+    }
+}
+
+function obter_ordem_grid() {
+    var colunas_grid = $('.coluna-ordenacao'),
+        ret = '';
+
+    colunas_grid.each(function (index, item) {
+        var coluna = $(item),
+            ordem = coluna.find('i');
+
+        if (ordem.length > 0) {
+            ordem_crescente = ordem.hasClass('glyphicon-arrow-down');
+            ret = coluna.attr('data-campo') + (ordem_crescente ? '' : ' desc');
+            return true;
+        }
+    });
+
+    return ret;
+}
+
+function add_anti_forgery_token(data) {
     data.__RequestVerificationToken = $('[name=__RequestVerificationToken]').val();
     return data;
 }
 
 function formatar_mensagem_aviso(mensagens) {
-    /*
-    var ret = '';
-
-    for (var i = 0; i < mensagens.length; i++) {
-        ret += '<li>' + mensagens[i] + '</li>';
-    }
-
-    return '<ul>' + ret + '</ul>';
-    *//*O template substitui isso*/
-
     var template =
         '<ul>' +
-        '{[ #. }}' +
+        '{{ #. }}' +
         '<li>{{ . }}</li>' +
-        '{{ /. }}'
-    '</ul >';
+        '{{ /. }}' +
+        '</ul>';
+
     return Mustache.render(template, mensagens);
 }
 
@@ -49,9 +79,7 @@ function abrir_form(dados) {
 }
 
 function criar_linha_grid(dados) {
-
     var template = $('#template-grid').html();
-
     return Mustache.render(template, dados);
 }
 
@@ -70,7 +98,7 @@ $(document).on('click', '#btn_incluir', function () {
             }
         })
             .fail(function () {
-                swal('Aviso', 'Não foi possivel recuperar as informações. Tente novamente em instantes.', 'warning');
+                swal('Aviso', 'Não foi possível recuperar as informações. Tente novamente em instantes.', 'warning');
             });
     })
     .on('click', '.btn-excluir', function () {
@@ -105,7 +133,7 @@ $(document).on('click', '#btn_incluir', function () {
                         }
                     })
                         .fail(function () {
-                            swal('Aviso', 'Não foi possivel excluir. Tente novamente em instantes.', 'warning');
+                            swal('Aviso', 'Não foi possível excluir. Tente novamente em instantes.', 'warning');
                         });
                 }
             }
@@ -147,16 +175,17 @@ $(document).on('click', '#btn_incluir', function () {
             }
         })
             .fail(function () {
-                swal('Aviso', 'Não foi possivel salvar as informações. Tente novamente em instantes.', 'warning');
+                swal('Aviso', 'Não foi possível salvar. Tente novamente em instantes.', 'warning');
             });
     })
     .on('click', '.page-item', function () {
-        var btn = $(this),
+        var ordem = obter_ordem_grid(),
+            btn = $(this),
             filtro = $('#txt_filtro'),
             tamPag = $('#ddl_tam_pag').val(),
             pagina = btn.text(),
             url = url_page_click,
-            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val() };
+            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val(), 'ordem': ordem };
 
         $.post(url, add_anti_forgery_token(param), function (response) {
             if (response) {
@@ -181,16 +210,17 @@ $(document).on('click', '#btn_incluir', function () {
             }
         })
             .fail(function () {
-                swal('Aviso', 'Não foi possivel recuperar as informações. Tente novamente em instantes.', 'warning');
+                swal('Aviso', 'Não foi possível recuperar as informações. Tente novamente em instantes.', 'warning');
             });
     })
     .on('change', '#ddl_tam_pag', function () {
-        var ddl = $(this),
+        var ordem = obter_ordem_grid(),
+            ddl = $(this),
             filtro = $('#txt_filtro'),
             tamPag = ddl.val(),
             pagina = 1,
             url = url_tam_pag_change,
-            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val() };
+            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val(), 'ordem': ordem };
 
         $.post(url, add_anti_forgery_token(param), function (response) {
             if (response) {
@@ -215,41 +245,87 @@ $(document).on('click', '#btn_incluir', function () {
             }
         })
             .fail(function () {
-                swal('Aviso', 'Não foi possivel recuperar as informações. Tente novamente em instantes.', 'warning');
+                swal('Aviso', 'Não foi possível recuperar as informações. Tente novamente em instantes.', 'warning');
             });
     })
-.on('keyup', '#txt_filtro', function () {
-    var filtro = $(this),
-        ddl = $('#ddl_tam_pag'),
-        tamPag = ddl.val(),
-        pagina = 1,
-        url = url_filtro_change,
-        param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val() };
+    .on('keyup', '#txt_filtro', function () {
+        var ordem = obter_ordem_grid(),
+            filtro = $(this),
+            ddl = $('#ddl_tam_pag'),
+            tamPag = ddl.val(),
+            pagina = 1,
+            url = url_filtro_change,
+            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val(), 'ordem': ordem };
 
-    $.post(url, add_anti_forgery_token(param), function (response) {
-        if (response) {
-            var table = $('#grid_cadastro').find('tbody');
+        $.post(url, add_anti_forgery_token(param), function (response) {
+            if (response) {
+                var table = $('#grid_cadastro').find('tbody');
 
-            table.empty();
+                table.empty();
+                if (response.length > 0) {
+                    $('#grid_cadastro').removeClass('invisivel');
+                    $('#mensagem_grid').addClass('invisivel');
 
-            if (response.length > 0) {
-                $('#grid_cadastro').removeClass('invisivel');
-                $('#mensagem_grid').addClass('invisivel');
-
-                for (var i = 0; i < response.length; i++) {
-                    table.append(criar_linha_grid(response[i]));
+                    for (var i = 0; i < response.length; i++) {
+                        table.append(criar_linha_grid(response[i]));
+                    }
                 }
-            }
-            else {
-                $('#grid_cadastro').addClass('invisivel');
-                $('#mensagem_grid').removeClass('invisivel');
-            }
+                else {
+                    $('#grid_cadastro').addClass('invisivel');
+                    $('#mensagem_grid').removeClass('invisivel');
+                }
 
-            ddl.siblings().removeClass('active');
-            ddl.addClass('active');
-        }
+                ddl.siblings().removeClass('active');
+                ddl.addClass('active');
+            }
+        })
+            .fail(function () {
+                swal('Aviso', 'Não foi possível recuperar as informações. Tente novamente em instantes.', 'warning');
+            });
     })
-        .fail(function () {
-            swal('Aviso', 'Não foi possivel recuperar as informações. Tente novamente em instantes.', 'warning');
-        });
+    .on('click', '.coluna-ordenacao', function () {
+        marcar_ordenacao_campo($(this));
+
+        var ordem = obter_ordem_grid(),
+            filtro = $('#txt_filtro'),
+            ddl = $('#ddl_tam_pag'),
+            tamPag = ddl.val(),
+            pagina = 1,
+            url = url_filtro_change,
+            param = { 'pagina': pagina, 'tamPag': tamPag, 'filtro': filtro.val(), 'ordem': ordem };
+
+        $.post(url, add_anti_forgery_token(param), function (response) {
+            if (response) {
+                var table = $('#grid_cadastro').find('tbody');
+
+                table.empty();
+                if (response.length > 0) {
+                    $('#grid_cadastro').removeClass('invisivel');
+                    $('#mensagem_grid').addClass('invisivel');
+
+                    for (var i = 0; i < response.length; i++) {
+                        table.append(criar_linha_grid(response[i]));
+                    }
+                }
+                else {
+                    $('#grid_cadastro').addClass('invisivel');
+                    $('#mensagem_grid').removeClass('invisivel');
+                }
+
+                ddl.siblings().removeClass('active');
+                ddl.addClass('active');
+            }
+        })
+            .fail(function () {
+                swal('Aviso', 'Não foi possível recuperar as informações. Tente novamente em instantes.', 'warning');
+            });
+    });
+
+$(document).ready(function () {
+    var grid = $('#grid_cadastro > tbody');
+    for (var i = 0; i < linhas.length; i++) {
+        grid.append(criar_linha_grid(linhas[i]));
+    }
+
+    marcar_ordenacao_campo($('#grid_cadastro thead tr th:nth-child(1) span'));
 });
