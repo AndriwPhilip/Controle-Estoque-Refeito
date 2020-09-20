@@ -35,7 +35,7 @@ namespace ControleEstoque.Web.Controllers
 
             return Json(lista);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarEstadosDoPais(int idPais)

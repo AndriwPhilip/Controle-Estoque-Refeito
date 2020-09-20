@@ -38,9 +38,7 @@
                             @RenderSection("TituloGrid", true)
                         </tr>
                     </thead>
-                    <tbody>
-                        
-                    </tbody>
+                    <tbody></tbody>
                 </table>
                 <div id="mensagem_grid" @Html.Raw(lista != null && lista.Count > 0 ? "class=\"invisivel\"" : "")>
                     Nenhum registro em @titulo
@@ -86,7 +84,6 @@
     </fieldset>
 </div>
 @section Scripts{
-
     <script src="~/Scripts/mustache.min.js"></script>
     <script src="~/Scripts/Cadastro/CadBase.js"></script>
     @RenderSection("Scripts", true)

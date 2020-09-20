@@ -3,7 +3,6 @@
     Layout = "~/Views/Shared/_Cadastro.cshtml";
     ViewBag.Title = "Marca de Produtos";
     ViewBag.Lista = Model;
-    ViewBag.Lista = Model;
 }
 
 @section Styles {
@@ -36,6 +35,7 @@
 
 @section Scripts{
     <script src="~/Scripts/bootstrap-select.js"></script>
+    <script src="~/Scripts/comum.js"></script>
     <script>
         var tituloPagina = '@ViewBag.Title';
         var url_excluir = '@Url.Action("ExcluirMarcaProduto", "CadMarcaProduto")';

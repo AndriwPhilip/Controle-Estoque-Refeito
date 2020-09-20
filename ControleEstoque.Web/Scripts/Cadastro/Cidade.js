@@ -60,11 +60,3 @@ $(document).on('change', '#ddl_pais', function () {
         });
     }
 });
-
-
-$(document).ready(function () {
-    var grid = $('#grid_cadastro > tbody');
-    for (var i = 0; i < linhas.length; i++) {
-        grid.append(criar_linha_grid(linhas[i]));
-    }
-});
