@@ -138,6 +138,7 @@
     <Compile Include="Controllers\OperacaoController.cs" />
     <Compile Include="Controllers\Operacao\OperEntradaProdutoController.cs" />
     <Compile Include="Controllers\Operacao\OperEntradaSaidaProdutoController.cs" />
+    <Compile Include="Controllers\Operacao\OperInventarioController.cs" />
     <Compile Include="Controllers\Operacao\OperSaidaProdutoController.cs" />
     <Compile Include="Controllers\RelatoriosController.cs" />
     <Compile Include="Global.asax.cs">
@@ -151,6 +152,7 @@
     <Compile Include="Models\EsqueciMinhaSenhaViewModel.cs" />
     <Compile Include="Models\EstadoModel.cs" />
     <Compile Include="Models\FornecedorModel.cs" />
+    <Compile Include="Models\ItemInventarioViewModel.cs" />
     <Compile Include="Models\MarcaProdutoModel .cs" />
     <Compile Include="Models\LocalArmazenamentoModel.cs" />
     <Compile Include="Models\GrupoProdutoModel.cs" />
@@ -158,6 +160,7 @@
     <Compile Include="Models\NovaSenhaViewModel.cs" />
     <Compile Include="Models\PaisModel.cs" />
     <Compile Include="Models\PerfilModel.cs" />
+    <Compile Include="Models\ProdutoInventarioViewModel.cs" />
     <Compile Include="Models\ProdutoModel.cs" />
     <Compile Include="Models\Tipos.cs" />
     <Compile Include="Models\UnidadeMedidaModel.cs" />
@@ -260,6 +263,7 @@
     <Content Include="Views\CadProduto\Index.cshtml" />
     <Content Include="Views\OperEntradaProduto\Index.cshtml" />
     <Content Include="Views\OperSaidaProduto\Index.cshtml" />
+    <Content Include="Views\OperInventario\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
