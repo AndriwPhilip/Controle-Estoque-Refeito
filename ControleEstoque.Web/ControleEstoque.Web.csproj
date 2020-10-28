@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -45,6 +46,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.2.0.35\lib\net461\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -145,26 +155,49 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\CriptoHelper.cs" />
+    <Compile Include="Migrations\202010272339510_inicial.cs" />
+    <Compile Include="Migrations\202010272339510_inicial.designer.cs">
+      <DependentUpon>202010272339510_inicial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AlteracaoSenhaUsuarioViewModel.cs" />
     <Compile Include="Models\Binders\EntradaSaidaProdutoViewModelModelBinder.cs" />
-    <Compile Include="Models\CidadeModel.cs" />
+    <Compile Include="Models\Domain\CidadeModel.cs" />
+    <Compile Include="Models\ContextoBD.cs" />
+    <Compile Include="Models\Domain\EntradaProdutoModel.cs" />
+    <Compile Include="Models\Domain\InventarioEstoqueModel.cs" />
+    <Compile Include="Models\Domain\SaidaProdutoModel.cs" />
     <Compile Include="Models\EntradaSaidaProdutoViewModel.cs" />
     <Compile Include="Models\EsqueciMinhaSenhaViewModel.cs" />
-    <Compile Include="Models\EstadoModel.cs" />
-    <Compile Include="Models\FornecedorModel.cs" />
+    <Compile Include="Models\Domain\EstadoModel.cs" />
+    <Compile Include="Models\Domain\FornecedorModel.cs" />
     <Compile Include="Models\ItemInventarioViewModel.cs" />
-    <Compile Include="Models\MarcaProdutoModel .cs" />
-    <Compile Include="Models\LocalArmazenamentoModel.cs" />
-    <Compile Include="Models\GrupoProdutoModel.cs" />
+    <Compile Include="Models\Domain\MarcaProdutoModel .cs" />
+    <Compile Include="Models\Domain\LocalArmazenamentoModel.cs" />
+    <Compile Include="Models\Domain\GrupoProdutoModel.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
+    <Compile Include="Models\Maps\CidadeMap.cs" />
+    <Compile Include="Models\Maps\EntradaProdutoMap.cs" />
+    <Compile Include="Models\Maps\EstadoMap.cs" />
+    <Compile Include="Models\Maps\FornecedorMap.cs" />
+    <Compile Include="Models\Maps\GrupoProdutoMap.cs" />
+    <Compile Include="Models\Maps\InventarioEstoqueMap.cs" />
+    <Compile Include="Models\Maps\LocalArmazenamentoMap.cs" />
+    <Compile Include="Models\Maps\MarcaProdutoMap.cs" />
+    <Compile Include="Models\Maps\PaisMap.cs" />
+    <Compile Include="Models\Maps\PerfilMap.cs" />
+    <Compile Include="Models\Maps\ProdutoMap.cs" />
+    <Compile Include="Models\Maps\SaidaProdutoMap.cs" />
+    <Compile Include="Models\Maps\UnidadeMedidaMap.cs" />
+    <Compile Include="Models\Maps\UsuarioMap.cs" />
     <Compile Include="Models\NovaSenhaViewModel.cs" />
-    <Compile Include="Models\PaisModel.cs" />
-    <Compile Include="Models\PerfilModel.cs" />
+    <Compile Include="Models\Domain\PaisModel.cs" />
+    <Compile Include="Models\Domain\PerfilModel.cs" />
     <Compile Include="Models\ProdutoInventarioViewModel.cs" />
-    <Compile Include="Models\ProdutoModel.cs" />
-    <Compile Include="Models\Tipos.cs" />
-    <Compile Include="Models\UnidadeMedidaModel.cs" />
-    <Compile Include="Models\UsuarioModel.cs" />
+    <Compile Include="Models\Domain\ProdutoModel.cs" />
+    <Compile Include="Models\Domain\Tipos.cs" />
+    <Compile Include="Models\Domain\UnidadeMedidaModel.cs" />
+    <Compile Include="Models\Domain\UsuarioModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -282,6 +315,11 @@
     <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.3.1.min.map" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202010272339510_inicial.resx">
+      <DependentUpon>202010272339510_inicial.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -315,7 +353,10 @@
       <ErrorText>Este projeto faz referência a pacotes do NuGet que não estão presentes neste computador. Use a Restauração de Pacotes do NuGet para baixá-los.  Para obter mais informações, consulte http://go.microsoft.com/fwlink/?LinkID=322105. O arquivo ausente é {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
   </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
