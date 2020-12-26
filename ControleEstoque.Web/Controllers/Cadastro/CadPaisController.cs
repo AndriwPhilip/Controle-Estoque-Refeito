@@ -7,7 +7,7 @@ using System.Web.Mvc;
 namespace ControleEstoque.Web.Controllers
 {
     [Authorize(Roles = "Gerente,Administrativo,Operador")]
-    public class CadPaisController : Controller
+    public class CadPaisController : BaseController
     {
         private const int _quantMaxLinhasPorPagina = 5;
 
@@ -17,7 +17,7 @@ namespace ControleEstoque.Web.Controllers
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
 
-            var lista = PaisModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
+            var lista = Mapper.Map<List<PaisViewModel>>(PaisModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina));
             var quant = PaisModel.RecuperarQuantidade();
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
@@ -28,9 +28,9 @@ namespace ControleEstoque.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult PaisPagina(int pagina, int tamPag, string ordem)
+        public JsonResult PaisPagina(int pagina, int tamPag, string filtro, string ordem)
         {
-            var lista = PaisModel.RecuperarLista(pagina, tamPag, ordem: ordem);
+            var lista = Mapper.Map<List<PaisViewModel>>(PaisModel.RecuperarLista(pagina, tamPag, filtro, ordem));
 
             return Json(lista);
         }
@@ -39,7 +39,9 @@ namespace ControleEstoque.Web.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarPais(int id)
         {
-            return Json(PaisModel.RecuperarPeloId(id));
+            var vm = Mapper.Map<PaisViewModel>(PaisModel.RecuperarPeloId(id));
+
+            return Json(vm);
         }
 
         [HttpPost]
@@ -52,7 +54,7 @@ namespace ControleEstoque.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult SalvarPais(PaisModel model)
+        public JsonResult SalvarPais(PaisViewModel model)
         {
             var resultado = "OK";
             var mensagens = new List<string>();
@@ -67,7 +69,8 @@ namespace ControleEstoque.Web.Controllers
             {
                 try
                 {
-                    var id = model.Salvar();
+                    var vm = Mapper.Map<PaisModel>(model);
+                    var id = vm.Salvar();
                     if (id > 0)
                     {
                         idSalvo = id.ToString();

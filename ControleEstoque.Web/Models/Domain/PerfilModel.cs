@@ -1,95 +1,73 @@
 ﻿using Dapper;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Data.SqlClient;
+using System.Data.Entity;
 using System.Linq;
 
 namespace ControleEstoque.Web.Models
 {
     public class PerfilModel
     {
+        #region Atributos
+
         public int Id { get; set; }
-
-        [Required(ErrorMessage = "Preencha o nome.")]
         public string Nome { get; set; }
-
         public bool Ativo { get; set; }
-
         public virtual List<UsuarioModel> Usuarios { get; set; }
 
-        public PerfilModel()
-        {
-            this.Usuarios = new List<UsuarioModel>();
-        }
+        #endregion
+
+        #region Métodos
 
         public static int RecuperarQuantidade()
         {
             var ret = 0;
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-                ret = conexao.ExecuteScalar<int>("select count(*) from perfil");
+                ret = db.PerfisUsuarios.Count();
             }
 
             return ret;
         }
 
-        public static List<PerfilModel> RecuperarLista(int pagina, int tamPagina, string ordem = "")
+        public static List<PerfilModel> RecuperarLista(int pagina, int tamPagina, string filtro = "", string ordem = "")
         {
             var ret = new List<PerfilModel>();
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
+                var filtroWhere = "";
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    filtroWhere = string.Format(" where lower(nome) like '%{0}%'", filtro.ToLower());
+                }
 
                 var pos = (pagina - 1) * tamPagina;
 
                 var sql = string.Format(
                     "select *" +
                     " from perfil" +
+                    filtroWhere +
                     " order by " + (!string.IsNullOrEmpty(ordem) ? ordem : "nome") +
                     " offset {0} rows fetch next {1} rows only",
                     pos > 0 ? pos - 1 : 0, tamPagina);
 
-                ret = conexao.Query<PerfilModel>(sql).ToList();
+                ret = db.Database.Connection.Query<PerfilModel>(sql).ToList();
             }
 
             return ret;
-        }
-
-        public void CarregarUsuarios()
-        {
-            this.Usuarios.Clear();
-
-            using (var conexao = new SqlConnection())
-            {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-
-                var sql =
-                    "select u.* " +
-                    "from perfil_usuario pu, usuario u " +
-                    "where (pu.id_perfil = @id_perfil) and (pu.id_usuario = u.id)";
-                var parametros = new { id_perfil = this.Id };
-                this.Usuarios = conexao.Query<UsuarioModel>(sql, parametros).ToList();
-            }
         }
 
         public static List<PerfilModel> RecuperarListaAtivos()
         {
             var ret = new List<PerfilModel>();
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-
-                var sql = "select * from perfil where ativo=1 order by nome";
-                ret = conexao.Query<PerfilModel>(sql).ToList();
+                ret = db.PerfisUsuarios
+                    .Where(x => x.Ativo)
+                    .OrderBy(x => x.Nome)
+                    .ToList();
             }
 
             return ret;
@@ -99,14 +77,12 @@ namespace ControleEstoque.Web.Models
         {
             PerfilModel ret = null;
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-
-                var sql = "select * from perfil where (id = @id)";
-                var parametros = new { id };
-                ret = conexao.Query<PerfilModel>(sql, parametros).SingleOrDefault();
+                ret = db.PerfisUsuarios
+                    .Include(x => x.Usuarios)
+                    .Where(x => x.Id == id)
+                    .SingleOrDefault();
             }
 
             return ret;
@@ -118,14 +94,13 @@ namespace ControleEstoque.Web.Models
 
             if (RecuperarPeloId(id) != null)
             {
-                using (var conexao = new SqlConnection())
+                using (var db = new ContextoBD())
                 {
-                    conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                    conexao.Open();
-
-                    var sql = "delete from perfil where (id = @id)";
-                    var parametros = new { id };
-                    ret = (conexao.Execute(sql, parametros) > 0);
+                    var perfil = new PerfilModel { Id = id };
+                    db.PerfisUsuarios.Attach(perfil);
+                    db.Entry(perfil).State = EntityState.Deleted;
+                    db.SaveChanges();
+                    ret = true;
                 }
             }
 
@@ -136,54 +111,54 @@ namespace ControleEstoque.Web.Models
         {
             var ret = 0;
 
-            var model = RecuperarPeloId(this.Id);
-
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
+                var model = db.PerfisUsuarios
+                    .Include(x => x.Usuarios)
+                    .Where(x => x.Id == this.Id)
+                    .SingleOrDefault();
 
-                using (var transacao = conexao.BeginTransaction())
+                if (model == null)
                 {
-                    if (model == null)
-                    {
-                        var sql = "insert into perfil (nome, ativo) values (@nome, @ativo); select convert(int, scope_identity())";
-                        var parametros = new { nome = this.Nome, ativo = (this.Ativo ? 1 : 0) };
-                        ret = conexao.ExecuteScalar<int>(sql, parametros, transacao);
-                        this.Id = ret;
-                    }
-                    else
-                    {
-                        var sql = "update perfil set nome=@nome, ativo=@ativo where id = @id";
-                        var parametros = new { id = this.Id, nome = this.Nome, ativo = (this.Ativo ? 1 : 0) };
-                        if (conexao.Execute(sql, parametros, transacao) > 0)
-                        {
-                            ret = this.Id;
-                        }
-                    }
-
                     if (this.Usuarios != null && this.Usuarios.Count > 0)
                     {
-                        var sql = "delete from perfil_usuario where (id_perfil = @id_perfil)";
-                        var parametros = new { id_perfil = this.Id };
-                        conexao.Execute(sql, parametros, transacao);
-
-                        if (this.Usuarios[0].Id != -1)
+                        foreach (var usuario in this.Usuarios)
                         {
-                            foreach (var usuario in this.Usuarios)
-                            {
-                                sql = "insert into perfil_usuario (id_perfil, id_usuario) values (@id_perfil, @id_usuario)";
-                                var parametrosUsuario = new { id_perfil = this.Id, id_usuario = usuario.Id };
-                                conexao.Execute(sql, parametrosUsuario, transacao);
-                            }
+                            db.Usuarios.Attach(usuario);
+                            db.Entry(usuario).State = EntityState.Unchanged;
                         }
                     }
 
-                    transacao.Commit();
+                    db.PerfisUsuarios.Add(this);
                 }
+                else
+                {
+                    model.Nome = this.Nome;
+                    model.Ativo = this.Ativo;
+
+                    if (this.Usuarios != null)
+                    {
+                        foreach (var usuario in model.Usuarios.FindAll(x => !this.Usuarios.Exists(u => u.Id == x.Id)))
+                        {
+                            model.Usuarios.Remove(usuario);
+                        }
+
+                        foreach (var usuario in this.Usuarios.FindAll(x => x.Id > 0 && !model.Usuarios.Exists(u => u.Id == x.Id)))
+                        {
+                            db.Usuarios.Attach(usuario);
+                            db.Entry(usuario).State = EntityState.Unchanged;
+                            model.Usuarios.Add(usuario);
+                        }
+                    }
+                }
+
+                db.SaveChanges();
+                ret = this.Id;
             }
 
             return ret;
         }
+
+        #endregion
     }
 }

@@ -7,7 +7,7 @@ using System.Web.Mvc;
 namespace ControleEstoque.Web.Controllers
 {
     [Authorize(Roles = "Gerente,Administrativo,Operador")]
-    public class CadMarcaProdutoController : Controller
+    public class CadMarcaProdutoController : BaseController
     {
         private const int _quantMaxLinhasPorPagina = 5;
 
@@ -17,7 +17,7 @@ namespace ControleEstoque.Web.Controllers
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
 
-            var lista = MarcaProdutoModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
+            var lista = Mapper.Map<List<MarcaProdutoViewModel>>(MarcaProdutoModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina));
             var quant = MarcaProdutoModel.RecuperarQuantidade();
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
@@ -28,9 +28,9 @@ namespace ControleEstoque.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult MarcaProdutoPagina(int pagina, int tamPag, string ordem)
+        public JsonResult MarcaProdutoPagina(int pagina, int tamPag, string filtro, string ordem)
         {
-            var lista = MarcaProdutoModel.RecuperarLista(pagina, tamPag, ordem: ordem);
+            var lista = Mapper.Map<List<MarcaProdutoViewModel>>(MarcaProdutoModel.RecuperarLista(pagina, tamPag, filtro, ordem));
 
             return Json(lista);
         }
@@ -39,8 +39,9 @@ namespace ControleEstoque.Web.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarMarcaProduto(int id)
         {
-            return Json(false);
-            //return Json(MarcaProdutoModel.RecuperarPeloId(id));
+            var vm = Mapper.Map<MarcaProdutoViewModel>(MarcaProdutoModel.RecuperarPeloId(id));
+
+            return Json(vm);
         }
 
         [HttpPost]
@@ -53,7 +54,7 @@ namespace ControleEstoque.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult SalvarMarcaProduto(MarcaProdutoModel model)
+        public JsonResult SalvarMarcaProduto(MarcaProdutoViewModel model)
         {
             var resultado = "OK";
             var mensagens = new List<string>();
@@ -68,7 +69,8 @@ namespace ControleEstoque.Web.Controllers
             {
                 try
                 {
-                    var id = model.Salvar();
+                    var vm = Mapper.Map<MarcaProdutoModel>(model);
+                    var id = vm.Salvar();
                     if (id > 0)
                     {
                         idSalvo = id.ToString();

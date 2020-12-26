@@ -4,24 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 
-namespace ControleEstoque.Web.Controllers.Cadastro
+namespace ControleEstoque.Web.Controllers
 {
     [Authorize(Roles = "Gerente")]
-    public class CadUsuarioController : Controller
+    public class CadUsuarioController : BaseController
     {
-
         private const int _quantMaxLinhasPorPagina = 5;
         private const string _senhaPadrao = "{$127;$188}";
 
-        
         public ActionResult Index()
         {
-            
+            ViewBag.SenhaPadrao = _senhaPadrao;
             ViewBag.ListaTamPag = new SelectList(new int[] { _quantMaxLinhasPorPagina, 10, 15, 20 }, _quantMaxLinhasPorPagina);
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
 
-            var lista = UsuarioModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
+            var lista = Mapper.Map<List<UsuarioViewModel>>(UsuarioModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina));
             var quant = UsuarioModel.RecuperarQuantidade();
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
@@ -30,31 +28,35 @@ namespace ControleEstoque.Web.Controllers.Cadastro
             return View(lista);
         }
 
-        [HttpPost]        
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult UsuarioPagina(int pagina, int tamPag, string ordem)
+        public JsonResult UsuarioPagina(int pagina, int tamPag, string filtro, string ordem)
         {
-            var lista = UsuarioModel.RecuperarLista(pagina, tamPag, ordem: ordem);
+            var lista = Mapper.Map<List<UsuarioViewModel>>(UsuarioModel.RecuperarLista(pagina, tamPag, filtro, ordem));
 
             return Json(lista);
         }
-        [HttpPost]        
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult RecuperarUsuario(int id)
         {
-            return Json(UsuarioModel.RecuperarPeloId(id));
+            var vm = Mapper.Map<UsuarioViewModel>(UsuarioModel.RecuperarPeloId(id));
+            vm.Senha = _senhaPadrao;
+
+            return Json(vm);
         }
 
-        [HttpPost]       
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ExcluirUsuario(int id)
         {
             return Json(UsuarioModel.ExcluirPeloId(id));
         }
 
-        [HttpPost]        
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SalvarUsuario(UsuarioModel model)
+        public ActionResult SalvarUsuario(UsuarioViewModel model)
         {
             var resultado = "OK";
             var mensagens = new List<string>();
@@ -74,8 +76,8 @@ namespace ControleEstoque.Web.Controllers.Cadastro
                         model.Senha = "";
                     }
 
-                    var id = model.Salvar();
-
+                    var vm = Mapper.Map<UsuarioModel>(model);
+                    var id = vm.Salvar();
                     if (id > 0)
                     {
                         idSalvo = id.ToString();
@@ -89,10 +91,9 @@ namespace ControleEstoque.Web.Controllers.Cadastro
                 {
                     resultado = "ERRO";
                 }
-
             }
+
             return Json(new { Resultado = resultado, Mensagens = mensagens, IdSalvo = idSalvo });
         }
-        
     }
 }

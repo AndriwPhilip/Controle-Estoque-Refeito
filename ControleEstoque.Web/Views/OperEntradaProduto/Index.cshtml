@@ -1,11 +1,14 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Entrada de produtos";
 }
 
 <style>
     #grid th:nth-child(2) {
         width: 150px;
+    }
+
+    #grid th:nth-child(3) {
+        width: 70px;
     }
 
     #entrada_produtos .row {
@@ -45,6 +48,7 @@
                                 <tr>
                                     <th>Produto</th>
                                     <th>Quantidade</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -162,6 +166,10 @@
                     }
                 });
             }
+        })
+        .on('click', '.btn_remover', function () {
+            var linha = $(this).closest('tr');
+            linha.remove();
         });
     </script>
     <script id="template-produto" type="x-tmpl-mustache">
@@ -176,6 +184,11 @@
             </td>
             <td>
                 <input type="number" id="txt_quantidade_{{ Sequencia }}" class="form-control" value="">
+            </td>
+            <td>
+                <a class="btn btn-warning btn_remover" role="button">
+                    <i class="glyphicon glyphicon-trash"></i>
+                </a>
             </td>
         </tr>
     </script>

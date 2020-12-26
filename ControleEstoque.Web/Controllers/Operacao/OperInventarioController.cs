@@ -1,22 +1,18 @@
 ﻿using ControleEstoque.Web.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace ControleEstoque.Web.Controllers
 {
-    public class OperInventarioController : Controller
+    [Authorize(Roles = "Gerente,Administrativo,Operador")]
+    public class OperInventarioController : BaseController
     {
-        // GET: OperInventario
         public ActionResult Index()
         {
             var model = ProdutoModel.RecuperarListaParaInventario();
-
             return View(model);
         }
-        
+
         [HttpPost]
         public JsonResult Salvar(List<ItemInventarioViewModel> dados)
         {

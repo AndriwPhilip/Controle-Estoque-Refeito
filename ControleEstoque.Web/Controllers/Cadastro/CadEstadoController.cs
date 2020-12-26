@@ -7,7 +7,7 @@ using System.Web.Mvc;
 namespace ControleEstoque.Web.Controllers
 {
     [Authorize(Roles = "Gerente,Administrativo,Operador")]
-    public class CadEstadoController : Controller
+    public class CadEstadoController : BaseController
     {
         private const int _quantMaxLinhasPorPagina = 5;
 
@@ -17,21 +17,21 @@ namespace ControleEstoque.Web.Controllers
             ViewBag.QuantMaxLinhasPorPagina = _quantMaxLinhasPorPagina;
             ViewBag.PaginaAtual = 1;
 
-            var lista = EstadoModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina);
+            var lista = Mapper.Map<List<EstadoViewModel>>(EstadoModel.RecuperarLista(ViewBag.PaginaAtual, _quantMaxLinhasPorPagina));
             var quant = EstadoModel.RecuperarQuantidade();
 
             var difQuantPaginas = (quant % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
             ViewBag.QuantPaginas = (quant / ViewBag.QuantMaxLinhasPorPagina) + difQuantPaginas;
-            ViewBag.Paises = PaisModel.RecuperarLista();
+            ViewBag.Paises = Mapper.Map<List<PaisViewModel>>(PaisModel.RecuperarLista());
 
             return View(lista);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult EstadoPagina(int pagina, int tamPag, string ordem)
+        public JsonResult EstadoPagina(int pagina, int tamPag, string filtro, string ordem)
         {
-            var lista = EstadoModel.RecuperarLista(pagina, tamPag, ordem: ordem);
+            var lista = Mapper.Map<List<EstadoViewModel>>(EstadoModel.RecuperarLista(pagina, tamPag, filtro, ordem));
 
             return Json(lista);
         }
@@ -40,8 +40,8 @@ namespace ControleEstoque.Web.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarEstadosDoPais(int idPais)
         {
-            var lista = EstadoModel.RecuperarLista(idPais: idPais);
-
+            var lista = Mapper.Map<List<EstadoViewModel>>(EstadoModel.RecuperarLista(idPais: idPais));
+            lista.Insert(0, new EstadoViewModel { Id = -1, Nome = "-- Não Selecionado --" });
             return Json(lista);
         }
 
@@ -49,7 +49,9 @@ namespace ControleEstoque.Web.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult RecuperarEstado(int id)
         {
-            return Json(EstadoModel.RecuperarPeloId(id));
+            var vm = Mapper.Map<EstadoViewModel>(EstadoModel.RecuperarPeloId(id));
+
+            return Json(vm);
         }
 
         [HttpPost]
@@ -62,7 +64,7 @@ namespace ControleEstoque.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult SalvarEstado(EstadoModel model)
+        public JsonResult SalvarEstado(EstadoViewModel model)
         {
             var resultado = "OK";
             var mensagens = new List<string>();
@@ -77,7 +79,8 @@ namespace ControleEstoque.Web.Controllers
             {
                 try
                 {
-                    var id = model.Salvar();
+                    var vm = Mapper.Map<EstadoModel>(model);
+                    var id = vm.Salvar();
                     if (id > 0)
                     {
                         idSalvo = id.ToString();

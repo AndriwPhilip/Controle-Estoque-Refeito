@@ -1,54 +1,42 @@
 ﻿using Dapper;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Data.SqlClient;
+using System.Data.Entity;
 using System.Linq;
 
 namespace ControleEstoque.Web.Models
 {
     public class CidadeModel
     {
-        
+        #region Atributos
+
         public int Id { get; set; }
-
-        [Required(ErrorMessage = "Preencha o nome.")]
-        [MaxLength(30, ErrorMessage = "O nome pode ter no máximo 30 caracteres.")]
         public string Nome { get; set; }
-
         public bool Ativo { get; set; }
-
-        [Required(ErrorMessage = "Selecione o país.")]
-        public int IdPais { get; set; }
-
-        [Required(ErrorMessage = "Selecione o estado.")]
         public int IdEstado { get; set; }
-
         public virtual EstadoModel Estado { get; set; }
+
+        #endregion
+
+        #region Métodos
 
         public static int RecuperarQuantidade()
         {
             var ret = 0;
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-                ret = conexao.ExecuteScalar<int>("select count(*) from cidade");
+                ret = db.Cidades.Count();
             }
 
             return ret;
         }
 
-        public static List<CidadeModel> RecuperarLista(int pagina = 0, int tamPagina = 0, string filtro = "", int idEstado = 0, string ordem = "")
+        public static List<CidadeViewModel> RecuperarLista(int pagina = 0, int tamPagina = 0, string filtro = "", string ordem = "", int idEstado = 0)
         {
-            var ret = new List<CidadeModel>();
+            var ret = new List<CidadeViewModel>();
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-
                 var pos = (pagina - 1) * tamPagina;
 
                 var filtroWhere = "";
@@ -70,31 +58,40 @@ namespace ControleEstoque.Web.Models
                 }
 
                 var sql =
-                    "select c.*, e.id_pais" +
-                    " from cidade c, estado e" +
+                    "select c.id, c.nome, c.ativo, c.id_estado as IdEstado, e.id_pais as IdPais," +
+                    " e.nome as NomeEstado, p.nome as NomePais" +
+                    " from cidade c, estado e, pais p" +
                     " where" +
                     filtroWhere +
-                    " (c.id_estado = e.id)" +
+                    " (c.id_estado = e.id) and" +
+                    " (e.id_pais = p.id)" +
                     " order by " + (!string.IsNullOrEmpty(ordem) ? ordem : "c.nome") +
                     paginacao;
 
-                ret = conexao.Query<CidadeModel>(sql).ToList();
+                ret = db.Database.Connection.Query<CidadeViewModel>(sql).ToList();
             }
 
             return ret;
         }
 
-        public static CidadeModel RecuperarPeloId(int id)
+        public static CidadeViewModel RecuperarPeloId(int id)
         {
-            CidadeModel ret = null;
+            CidadeViewModel ret = null;
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
-                var sql = "select c.id, c.nome, c.ativo, c.id_estado as IdEstado, e.id_pais as IdPais from cidade c, estado e where (c.id = @id) and (c.id_estado = e.id)";
-                var parametros = new { id };
-                ret = conexao.Query<CidadeModel>(sql, parametros).SingleOrDefault();
+                ret = db.Cidades
+                    .Include(x => x.Estado)
+                    .Where(x => x.Id == id)
+                    .Select(x => new CidadeViewModel
+                    {
+                        Id = x.Id,
+                        Nome = x.Nome,
+                        Ativo = x.Ativo,
+                        IdEstado = x.IdEstado,
+                        IdPais = x.Estado.IdPais
+                    })
+                    .SingleOrDefault();
             }
 
             return ret;
@@ -106,14 +103,13 @@ namespace ControleEstoque.Web.Models
 
             if (RecuperarPeloId(id) != null)
             {
-                using (var conexao = new SqlConnection())
+                using (var db = new ContextoBD())
                 {
-                    conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                    conexao.Open();
-
-                    var sql = "delete from cidade where (id = @id)";
-                    var parametros = new { id };
-                    ret = (conexao.Execute(sql, parametros) > 0);
+                    var cidade = new CidadeModel { Id = id };
+                    db.Cidades.Attach(cidade);
+                    db.Entry(cidade).State = EntityState.Deleted;
+                    db.SaveChanges();
+                    ret = true;
                 }
             }
 
@@ -126,28 +122,25 @@ namespace ControleEstoque.Web.Models
 
             var model = RecuperarPeloId(this.Id);
 
-            using (var conexao = new SqlConnection())
+            using (var db = new ContextoBD())
             {
-                conexao.ConnectionString = ConfigurationManager.ConnectionStrings["principal"].ConnectionString;
-                conexao.Open();
                 if (model == null)
                 {
-                    var sql = "insert into cidade (nome, id_estado, ativo) values (@nome, @id_estado, @ativo); select convert(int, scope_identity())";
-                    var parametros = new { nome = this.Nome, id_estado = this.IdEstado, ativo = (this.Ativo ? 1 : 0) };
-                    ret = conexao.ExecuteScalar<int>(sql, parametros);
+                    db.Cidades.Add(this);
                 }
                 else
                 {
-                    var sql = "update cidade set nome=@nome, id_estado=@id_estado, ativo=@ativo where id = @id";
-                    var parametros = new { id = this.Id, nome = this.Nome, id_estado = this.IdEstado, ativo = (this.Ativo ? 1 : 0) };
-                    if (conexao.Execute(sql, parametros) > 0)
-                    {
-                        ret = this.Id;
-                    }
+                    db.Cidades.Attach(this);
+                    db.Entry(this).State = EntityState.Modified;
                 }
+
+                db.SaveChanges();
+                ret = this.Id;
             }
 
             return ret;
         }
+
+        #endregion
     }
 }

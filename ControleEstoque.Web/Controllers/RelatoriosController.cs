@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
 namespace ControleEstoque.Web.Controllers
 {
-    public class RelatoriosController : Controller
+    public class RelatorioController : BaseController
     {
-        [Authorize]
-        public ActionResult PosicaoEstoque()
-        {
-            return View();
-        }
         [Authorize]
         public ActionResult Ressuprimento()
         {
